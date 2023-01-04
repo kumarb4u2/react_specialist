@@ -10,48 +10,46 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useForm } from 'react-hook-form';
+import { useMutation } from '@apollo/client';
+
 import {
+  Alert,
   FormControl,
   FormHelperText,
   InputLabel,
   MenuItem,
   Select,
 } from '@mui/material';
-
-function Copyright(props: any) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Easy bank
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
-    </Typography>
-  );
-}
+import { incomeList, occupationList } from '../../constants';
+import { addUser } from '../../queries/users';
 
 const theme = createTheme();
 
 export default function SignUp() {
   const [occupation, setOccupation] = useState('');
   const [income, setIncome] = useState('');
+  const [signupSuccess, setSignupSuccess] = useState(false);
   const {
     register,
     handleSubmit,
     setValue,
     formState: { errors },
   } = useForm();
-  const onSubmit = (data: any) => console.log(data);
+
+  const [mutateFunction] = useMutation(addUser);
+
+  const onSubmit = (data: any) => {
+    mutateFunction({
+      variables: { ...data },
+    }).then(() => {
+      setSignupSuccess(true);
+    });
+  };
 
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
+        {signupSuccess && <Alert severity="success">Sign up is success.</Alert>}
         <CssBaseline />
         <Box
           sx={{
@@ -154,10 +152,11 @@ export default function SignUp() {
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    <MenuItem value="public">Public sector</MenuItem>
-                    <MenuItem value="private">Private sector</MenuItem>
-                    <MenuItem value="business">Business</MenuItem>
-                    <MenuItem value="unemployed">Unemployed</MenuItem>
+                    {occupationList.map((item) => (
+                      <MenuItem value={item.value} key={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
                   </Select>
                   {errors.occupation && (
                     <FormHelperText>Occupation is required.</FormHelperText>
@@ -185,10 +184,11 @@ export default function SignUp() {
                     <MenuItem value="">
                       <em>None</em>
                     </MenuItem>
-                    <MenuItem value="lt1">Less than 1 lac</MenuItem>
-                    <MenuItem value="1to5">1 to 5 lacs</MenuItem>
-                    <MenuItem value="5to10">5 to 10 lacs</MenuItem>
-                    <MenuItem value="gt10">Greater than 10 lacs</MenuItem>
+                    {incomeList.map((item) => (
+                      <MenuItem value={item.value} key={item.value}>
+                        {item.label}
+                      </MenuItem>
+                    ))}
                   </Select>
                   {errors.income && (
                     <FormHelperText>Income is required.</FormHelperText>
@@ -200,12 +200,12 @@ export default function SignUp() {
                   size="small"
                   required
                   fullWidth
-                  id="idNumber"
+                  id="idProofNumber"
                   label="Id number"
-                  autoComplete="idNumber"
-                  error={!!errors.idNumber}
-                  helperText={errors.idNumber && 'Id is required.'}
-                  {...register('idNumber', { required: true })}
+                  autoComplete="idProofNumber"
+                  error={!!errors.idProofNumber}
+                  helperText={errors.idProofNumber && 'Id is required.'}
+                  {...register('idProofNumber', { required: true })}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -213,12 +213,12 @@ export default function SignUp() {
                   size="small"
                   required
                   fullWidth
-                  id="userId"
+                  id="userName"
                   label="User Id"
-                  autoComplete="userId"
-                  error={!!errors.userId}
-                  helperText={errors.userId && 'User id is required.'}
-                  {...register('userId', { required: true })}
+                  autoComplete="userName"
+                  error={!!errors.userName}
+                  helperText={errors.userName && 'User id is required.'}
+                  {...register('userName', { required: true })}
                 />
               </Grid>
               <Grid item xs={12} sm={6}>
@@ -253,7 +253,6 @@ export default function SignUp() {
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
       </Container>
     </ThemeProvider>
   );
